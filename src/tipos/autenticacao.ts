@@ -2,6 +2,7 @@ export interface Usuario {
   id: string;
   email: string;
   nome: string;
+  fotoUrl?: string;
   criadoEm: Date;
 }
 

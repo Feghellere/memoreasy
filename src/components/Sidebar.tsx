@@ -123,11 +123,23 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
             flex 
             items-center 
             justify-center 
+            flex-shrink-0
             ${darkMode ? 'bg-[#3D9CD3]' : 'bg-blue-600'} 
             text-white 
             font-medium
+            overflow-hidden
+            transition-all duration-300
           `}>
-            {usuario?.nome?.charAt(0).toUpperCase()}
+            {usuario?.fotoUrl ? (
+              <img 
+                src={usuario.fotoUrl} 
+                alt="Foto de perfil" 
+                className="w-full h-full object-cover object-center"
+                loading="eager"
+              />
+            ) : (
+              usuario?.nome?.charAt(0).toUpperCase()
+            )}
           </div>
           <div>
             <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -141,14 +153,14 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
       </div>
 
       <div className="p-2">
-        <button className={`
+        <Link to="/app/configuracoes" className={`
           w-full flex items-center px-3 py-2 rounded-lg text-sm
           ${darkMode ? 'text-gray-300 hover:bg-gray-700/50' : 'text-gray-700 hover:bg-gray-100'}
           transition-colors
         `}>
           <Settings className="h-4 w-4 mr-3" />
           Configurações
-        </button>
+        </Link>
 
         <button className={`
           w-full flex items-center px-3 py-2 rounded-lg text-sm
@@ -336,40 +348,58 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
           ref={profileRef}
           className={`
             relative 
-            p-4 
+            ${isExpanded ? 'p-4' : 'py-4'}
             border-t 
+            ${!isExpanded && 'flex justify-center items-center'}
             ${darkMode ? 'border-gray-700' : 'border-gray-200'}
+            transition-all duration-300
           `}
         >
-          <button
-            onClick={handleProfileClick}
-            className={`
-              w-full flex items-center 
-              ${isExpanded ? 'justify-start' : 'justify-center'}
-              p-2 rounded-lg transition-colors
-              ${darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}
-            `}
+          <div className={`
+            flex 
+            items-center 
+            ${isExpanded ? 'px-3 py-2' : 'p-1.5'} 
+            ${isExpanded ? 'space-x-3' : ''} 
+            cursor-pointer
+            rounded-lg
+            ${!isExpanded && 'flex justify-center items-center'}
+            ${darkMode ? 'hover:bg-gray-800/50' : 'hover:bg-gray-100'}
+            transition-all duration-300
+          `}
+          onClick={handleProfileClick}
           >
             <div className={`
-              ${isExpanded ? 'w-9 h-9' : 'w-8 h-8'}
-              rounded-full flex items-center justify-center 
+              ${isExpanded ? 'w-8 h-8' : 'w-7 h-7'}
+              rounded-full 
+              flex 
+              items-center 
+              justify-center 
+              flex-shrink-0
               ${darkMode ? 'bg-[#3D9CD3]' : 'bg-blue-600'} 
               text-white font-medium
+              overflow-hidden
+              transition-all duration-300
             `}>
-              {usuario?.nome?.charAt(0).toUpperCase()}
+              {usuario?.fotoUrl ? (
+                <img 
+                  src={usuario.fotoUrl} 
+                  alt="Foto de perfil" 
+                  className="w-full h-full object-cover object-center"
+                  loading="eager"
+                />
+              ) : (
+                usuario?.nome?.charAt(0).toUpperCase()
+              )}
             </div>
             {isExpanded && (
-              <motion.span
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="ml-3 text-sm font-medium truncate"
-              >
-                {usuario?.nome}
-              </motion.span>
+              <div className="flex-1 overflow-hidden">
+                <p className={`text-sm font-medium truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {usuario?.nome}
+                </p>
+              </div>
             )}
-          </button>
-
+          </div>
+          
           <AnimatePresence>
             {isExpanded && profileModalOpen && <UserMenu />}
           </AnimatePresence>

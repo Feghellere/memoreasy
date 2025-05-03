@@ -12,6 +12,7 @@ import Gerador from '../paginas/Gerador';
 import Flashcards from '../paginas/Flashcards';
 import Mapas from '../paginas/Mapas';
 import Parafrase from '../paginas/Parafrase';
+import Configuracoes from '../paginas/Configuracoes';
 import RotaProtegida from './RotaProtegida';
 
 export function RotasApp() {
@@ -35,6 +36,7 @@ export function RotasApp() {
           <Route path="quiz" element={<Quiz />} />
           <Route path="flashcards" element={<Flashcards />} />
           <Route path="mapas" element={<Mapas />} />
+          <Route path="configuracoes" element={<Configuracoes />} />
         </Route>
       </Route>
     </Routes>
