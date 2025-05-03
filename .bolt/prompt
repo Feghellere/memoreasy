@@ -1,0 +1,11 @@
+Gemini (gemini-2.0-flash-lite) como LLM principal
+
+OpenAI (gpt-4o-mini) como fallback se o Gemini falhar
+
+Nenhuma chave ou lógica de IA deve ficar exposta no front-end/Client-side
+
+Foque em performance, segurança, escalabilidade e UX/UI
+
+Escreva o código completo em português, incluindo nomes de arquivos, variáveis, tabelas, rotas e funções
+
+Visual e código devem ser sempre modernos e com base em boas práticas de desenvolvimento
