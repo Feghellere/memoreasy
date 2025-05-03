@@ -28,3 +28,6 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Cursor MCP config (não subir para o GitHub)
+.cursor/
