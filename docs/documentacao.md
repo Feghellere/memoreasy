@@ -64,6 +64,12 @@ O contexto de autenticação gerencia o estado do usuário atual e disponibiliza
 - `cadastrar(email, senha, nome)`
 - `sair()`
 
+> ✅ **ID do projeto Supabase:**  
+> Este repositório está vinculado ao projeto Supabase com o identificador:  
+> `uktkugoorkqgyigkdbpr`  
+>  
+> Use esse ID para integrações via MCP, automações ou scripts.  
+
 ## 📱 Páginas e Funcionalidades
 
 ### Páginas Públicas
