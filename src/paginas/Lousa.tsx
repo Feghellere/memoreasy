@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ElementoLousa, Ferramenta } from '../tipos/lousa';
 import { lousaService, Lousa as LousaTipo } from '../lib/lousaService';
+import { verificarAutenticacao } from '../lib/supabaseClient';
 
 interface OutletContextType {
   darkMode: boolean;
@@ -232,23 +233,56 @@ const Lousa = () => {
               const img = new Image();
               img.src = e.target.result as string;
               img.onload = () => {
-                const ctx = canvasRef.current!.getContext('2d');
-                if (ctx) {
-                  // Desenhar a imagem com tamanho proporcional
-                  const maxSize = 300;
-                  let width = img.width;
-                  let height = img.height;
+                console.log('Imagem carregada com sucesso:', img.width, 'x', img.height);
+                
+                // Limpar o canvas antes de desenhar
+                const ctx = canvasRef.current?.getContext('2d');
+                if (!canvasRef.current || !ctx) {
+                  console.error('Canvas ou contexto não disponível');
+                  setCarregando(false);
+                  return;
+                }
+                
+                ctx.fillStyle = darkMode ? '#121827' : '#ffffff';
+                ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+                
+                // Verificar se a imagem tem dimensões válidas
+                if (img.width === 0 || img.height === 0) {
+                  console.error('Imagem carregada com dimensões inválidas');
+                  setCarregando(false);
+                  return;
+                }
+                
+                try {
+                  // Desenhar a imagem no canvas com dimensões apropriadas
+                  const canvasWidth = canvasRef.current.width;
+                  const canvasHeight = canvasRef.current.height;
                   
-                  if (width > height && width > maxSize) {
-                    height = (height / width) * maxSize;
-                    width = maxSize;
-                  } else if (height > maxSize) {
-                    width = (width / height) * maxSize;
-                    height = maxSize;
+                  // Manter a proporção da imagem original
+                  const aspectRatio = img.width / img.height;
+                  let drawWidth = canvasWidth;
+                  let drawHeight = canvasHeight;
+                  
+                  if (canvasWidth / canvasHeight > aspectRatio) {
+                    // Canvas é mais largo que a imagem
+                    drawWidth = drawHeight * aspectRatio;
+                  } else {
+                    // Canvas é mais alto que a imagem
+                    drawHeight = drawWidth / aspectRatio;
                   }
                   
-                  ctx.drawImage(img, x, y, width, height);
+                  // Centralizar a imagem
+                  const x = (canvasWidth - drawWidth) / 2;
+                  const y = (canvasHeight - drawHeight) / 2;
+                  
+                  // Desenhar com dimensões corretas
+                  ctx.drawImage(img, 0, 0, img.width, img.height, x, y, drawWidth, drawHeight);
+                  console.log('Imagem desenhada no canvas');
+                } catch (err) {
+                  console.error('Erro ao desenhar a imagem:', err);
                 }
+                
+                setCarregando(false);
               };
             }
           };
@@ -422,49 +456,148 @@ const Lousa = () => {
   // Carregar lousa existente quando houver um id na URL
   useEffect(() => {
     const carregarLousa = async () => {
-      if (lousaIdUrl) {
-        try {
-          setCarregando(true);
-          const lousa = await lousaService.obterLousa(lousaIdUrl);
-          setLousaId(lousa.id || null);
-          setTitulo(lousa.titulo);
-          setDescricao(lousa.descricao || '');
+      if (!lousaIdUrl) return;
+      
+      try {
+        setCarregando(true);
+        
+        // Log apenas em desenvolvimento
+        if (import.meta.env.DEV) {
+          console.log('Carregando lousa com ID:', lousaIdUrl);
+        }
+        
+        // Aguardar um momento para garantir que o canvas esteja disponível
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if (!canvasRef.current) {
+          console.error('Canvas não está disponível');
+          setCarregando(false);
+          return;
+        }
+        
+        const lousa = await lousaService.obterLousa(lousaIdUrl);
+        
+        // Log apenas em desenvolvimento
+        if (import.meta.env.DEV) {
+          console.log('Lousa carregada:', { 
+            id: lousa.id, 
+            titulo: lousa.titulo,
+            temConteudo: !!lousa.conteudo?.length 
+          });
+        }
+        
+        setLousaId(lousa.id || null);
+        setTitulo(lousa.titulo);
+        setDescricao(lousa.descricao || '');
+        
+        // Redimensionar o canvas antes de desenhar
+        const canvas = canvasRef.current;
+        
+        // Ajustar o tamanho do canvas para preencher a área disponível
+        canvas.width = window.innerWidth - 200;
+        canvas.height = window.innerHeight - 150;
+        console.log('Canvas redimensionado para', canvas.width, 'x', canvas.height);
+        
+        // Aplicar cor de fundo baseada no modo escuro/claro
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          console.error('Não foi possível obter contexto 2D do canvas');
+          setCarregando(false);
+          return;
+        }
+        
+        ctx.fillStyle = darkMode ? '#121827' : '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Se houver conteúdo, tentar carregar
+        if (lousa.conteudo && Array.isArray(lousa.conteudo) && lousa.conteudo.length > 0) {
+          console.log('Tentando carregar conteúdo da lousa');
           
-          // Se houver thumbnail, carregar como fundo
-          if (lousa.conteudo && lousa.conteudo.length > 0) {
-            // Implementar lógica para carregar o desenho existente
-            const ctx = canvasRef.current?.getContext('2d');
-            if (ctx) {
-              // Aqui vamos simplificar carregando apenas a imagem base64
-              const img = new Image();
-              img.onload = () => {
-                ctx.drawImage(img, 0, 0);
-                setCarregando(false);
-              };
-              img.onerror = () => {
-                console.error('Erro ao carregar imagem da lousa');
-                setCarregando(false);
-              };
+          // Se houver um conteúdo base64, carregar
+          if (typeof lousa.conteudo[0] === 'string') {
+            console.log('Carregando imagem base64');
+            
+            // Criar a imagem
+            const img = new Image();
+            
+            // Configurar o handler de carregamento
+            img.onload = () => {
+              console.log('Imagem carregada com sucesso:', img.width, 'x', img.height);
               
-              // Se houver um conteúdo base64, carregar
-              if (typeof lousa.conteudo[0] === 'string') {
-                img.src = lousa.conteudo[0] as string;
-              } else {
+              // Verificar se o canvas ainda está disponível
+              if (!canvasRef.current || !ctx) {
+                console.error('Canvas ou contexto perdido após carregar imagem');
+                setCarregando(false);
+                return;
+              }
+              
+              // Verificar se a imagem tem dimensões válidas
+              if (img.width === 0 || img.height === 0) {
+                console.error('Imagem carregada com dimensões inválidas');
+                setCarregando(false);
+                return;
+              }
+              
+              try {
+                // Limpar o canvas antes de desenhar
+                ctx.fillStyle = darkMode ? '#121827' : '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Calcular dimensões para preservar proporção
+                const aspectRatio = img.width / img.height;
+                let drawWidth = canvas.width;
+                let drawHeight = canvas.height;
+                
+                // Ajustar com base na proporção
+                if (canvas.width / canvas.height > aspectRatio) {
+                  // Canvas é mais largo que a imagem
+                  drawWidth = drawHeight * aspectRatio;
+                } else {
+                  // Canvas é mais alto que a imagem
+                  drawHeight = drawWidth / aspectRatio;
+                }
+                
+                // Centralizar a imagem
+                const x = (canvas.width - drawWidth) / 2;
+                const y = (canvas.height - drawHeight) / 2;
+                
+                // Desenhar com dimensões corretas
+                ctx.drawImage(img, 0, 0, img.width, img.height, x, y, drawWidth, drawHeight);
+                console.log('Imagem desenhada no canvas com dimensões:', drawWidth, 'x', drawHeight);
+              } catch (err) {
+                console.error('Erro ao desenhar a imagem:', err);
+              } finally {
                 setCarregando(false);
               }
-            }
+            };
+            
+            // Configurar handler de erro
+            img.onerror = (err) => {
+              console.error('Erro ao carregar imagem da lousa:', err);
+              setCarregando(false);
+            };
+            
+            // Iniciar carregamento da imagem
+            img.src = lousa.conteudo[0] as string;
           } else {
+            console.warn('Conteúdo da lousa não é uma string:', lousa.conteudo[0]);
             setCarregando(false);
           }
-        } catch (error) {
-          console.error('Erro ao carregar lousa:', error);
+        } else {
+          console.warn('Lousa não tem conteúdo para carregar');
           setCarregando(false);
         }
+      } catch (error) {
+        console.error('Erro ao carregar lousa:', error);
+        alert('Não foi possível carregar a lousa. Tente novamente.');
+        setCarregando(false);
       }
     };
     
-    carregarLousa();
-  }, [lousaIdUrl]);
+    if (lousaIdUrl) {
+      carregarLousa();
+    }
+  }, [lousaIdUrl, darkMode]);
 
   // Função para salvar o desenho da lousa
   const salvarLousa = async () => {
@@ -473,8 +606,32 @@ const Lousa = () => {
     try {
       setSalvando(true);
       
+      // Validar título (obrigatório)
+      if (!titulo.trim()) {
+        alert('Por favor, informe um título para a lousa');
+        setSalvando(false);
+        return;
+      }
+      
+      // Verificar autenticação antes de prosseguir
+      const autenticado = await verificarAutenticacao();
+      if (!autenticado) {
+        alert('Sua sessão pode ter expirado. Por favor, faça login novamente.');
+        setSalvando(false);
+        // Redirecionar para página de login
+        navigate('/login', { replace: true });
+        return;
+      }
+      
       // Obter imagem do canvas como base64
       const imgBase64 = canvasRef.current.toDataURL('image/png');
+      
+      // Verificar tamanho da imagem (base64 não deve exceder 6MB para evitar problemas com o Supabase)
+      if (imgBase64.length > 6 * 1024 * 1024) {
+        alert('A imagem da lousa é muito grande. Tente reduzir a complexidade do desenho.');
+        setSalvando(false);
+        return;
+      }
       
       // Estruturar o objeto da lousa
       const dadosLousa = {
@@ -495,9 +652,41 @@ const Lousa = () => {
       
       setModalSalvarAberto(false);
       alert('Lousa salva com sucesso!');
-    } catch (error) {
-      console.error('Erro ao salvar lousa:', error);
-      alert('Erro ao salvar a lousa. Tente novamente.');
+    } catch (error: any) {
+      console.error('Erro ao salvar lousa:', typeof error === 'object' ? { 
+        code: error.code,
+        message: error.message 
+      } : 'Erro desconhecido');
+      
+      // Exibir mensagem de erro mais específica
+      let mensagemErro = 'Erro ao salvar a lousa. ';
+      
+      if (error.message && typeof error.message === 'string') {
+        if (error.message.includes('autenticado') || error.message.includes('API key')) {
+          mensagemErro = 'Erro de autenticação. Por favor, faça login novamente.';
+          // Redirecionar para página de login
+          navigate('/login', { replace: true });
+        } else if (error.message.includes('No API key found')) {
+          mensagemErro = 'Chave de API não encontrada. Por favor, atualize a página e faça login novamente.';
+          navigate('/login', { replace: true });
+        } else if (error.message.includes('violates row-level security policy')) {
+          mensagemErro = 'Erro de permissão: você não tem autorização para criar esta lousa. Por favor, faça login novamente.';
+          navigate('/login', { replace: true });
+        }
+      } else if (error.code === '403') {
+        mensagemErro += 'Você não tem permissão para salvar esta lousa. Tente fazer login novamente.';
+        navigate('/login', { replace: true });
+      } else if (error.code === 'PGRST116') {
+        mensagemErro += 'Erro de permissão no banco de dados. Tente fazer login novamente.';
+        navigate('/login', { replace: true });
+      } else if (error.code === '42501') {
+        mensagemErro = 'Erro de permissão no banco de dados (RLS). Por favor, faça login novamente.';
+        navigate('/login', { replace: true });
+      } else {
+        mensagemErro += 'Tente novamente ou atualize a página.';
+      }
+      
+      alert(mensagemErro);
     } finally {
       setSalvando(false);
     }

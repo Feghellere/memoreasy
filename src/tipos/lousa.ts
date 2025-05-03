@@ -1,14 +1,14 @@
 export interface ElementoLousa {
-  id: string;
-  tipo: 'linha' | 'retangulo' | 'circulo' | 'texto' | 'imagem' | 'seta';
-  x: number;
-  y: number;
+  id?: string;
+  tipo?: 'linha' | 'retangulo' | 'circulo' | 'texto' | 'imagem' | 'seta';
+  x?: number;
+  y?: number;
   largura?: number;
   altura?: number;
   raio?: number;
   texto?: string;
-  cor: string;
-  espessura: number;
+  cor?: string;
+  espessura?: number;
   pontos?: { x: number; y: number }[];
   imgSrc?: string;
   xFim?: number;
