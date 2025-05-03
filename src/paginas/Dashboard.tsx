@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, PenTool, Network, FileText, Search, FlaskConical, Car as Cards } from 'lucide-react';
+import { BookOpen, PenTool, Network, FileText, Search, FlaskConical, Car as Cards, Presentation } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 export default function Dashboard() {
@@ -55,6 +55,13 @@ export default function Dashboard() {
       icone: Network,
       cor: darkMode ? 'bg-[#3D9CD3]' : 'bg-blue-600',
       rota: '/app/mapas'
+    },
+    {
+      titulo: 'Lousa',
+      descricao: 'Crie desenhos e diagramas interativos',
+      icone: Presentation,
+      cor: darkMode ? 'bg-[#3D9CD3]' : 'bg-blue-600',
+      rota: '/app/lousa'
     },
   ];
 

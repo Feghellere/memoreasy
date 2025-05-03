@@ -13,6 +13,8 @@ import Flashcards from '../paginas/Flashcards';
 import Mapas from '../paginas/Mapas';
 import Parafrase from '../paginas/Parafrase';
 import Configuracoes from '../paginas/Configuracoes';
+import Lousa from '../paginas/Lousa';
+import ListaLousas from '../paginas/ListaLousas';
 import RotaProtegida from './RotaProtegida';
 
 export function RotasApp() {
@@ -37,6 +39,10 @@ export function RotasApp() {
           <Route path="flashcards" element={<Flashcards />} />
           <Route path="mapas" element={<Mapas />} />
           <Route path="configuracoes" element={<Configuracoes />} />
+          <Route path="lousa/:id" element={<Lousa />} />
+          <Route path="nova-lousa" element={<Lousa />} />
+          <Route path="minhas-lousas" element={<ListaLousas />} />
+          <Route path="lousa" element={<Navigate to="/app/minhas-lousas" replace />} />
         </Route>
       </Route>
     </Routes>

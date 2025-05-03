@@ -20,6 +20,7 @@ import {
   Menu,
   Settings,
   Package,
+  Presentation,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -70,6 +71,11 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
     { path: '/app/quiz', icon: BookOpen, label: 'Quiz' },
     { path: '/app/flashcards', icon: Cards, label: 'Flashcards' },
     { path: '/app/mapas', icon: Network, label: 'Mapa Mental' },
+    { 
+      path: '/app/minhas-lousas', 
+      icon: Presentation, 
+      label: 'Lousa'
+    },
   ];
 
   const handleSair = async () => {
@@ -305,41 +311,49 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
         </div>
 
         <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
+          {menuItems.map((item, index) => {
+            // Verificar se o item está ativo
             const isActive = location.pathname === item.path;
+            
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  flex items-center justify-center lg:justify-start 
-                  px-3 py-2 rounded-lg transition-all duration-200
-                  ${isActive
-                    ? darkMode
-                      ? 'bg-[#3D9CD3] text-white'
-                      : 'bg-blue-100 text-blue-900'
-                    : darkMode
-                      ? 'text-gray-300 hover:bg-gray-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }
-                `}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                      className="ml-3 whitespace-nowrap overflow-hidden"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </Link>
+              <div key={item.path} className="mb-1">
+                <Link
+                  to={item.path}
+                  className={`
+                    flex items-center py-2 px-3 rounded-lg transition-colors
+                    ${isActive
+                      ? darkMode
+                        ? 'bg-[#3D9CD3] text-white'
+                        : 'bg-blue-600 text-white'
+                      : darkMode
+                        ? 'text-gray-300 hover:bg-gray-800/50'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }
+                  `}
+                  onClick={() => {
+                    // Se for mobile, fechar a sidebar ao clicar
+                    if (isMobile) {
+                      setIsExpanded(false);
+                    }
+                  }}
+                >
+                  <item.icon className={`flex-shrink-0 ${isExpanded ? 'mr-3' : ''}`} />
+                  
+                  <AnimatePresence initial={false} mode="wait">
+                    {isExpanded && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="truncate"
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              </div>
             );
           })}
         </nav>
