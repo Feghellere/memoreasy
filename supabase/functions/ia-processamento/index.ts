@@ -84,7 +84,7 @@ async function processarComOpenAI(texto: string, tipo: string, apiKey: string) {
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [{
         role: 'user',
         content: `${tipo}: ${texto}`
