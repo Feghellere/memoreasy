@@ -5,6 +5,7 @@ interface QuizQuestion {
   alternativas: string[];
   respostaCorreta: number;
   explicacao?: string;
+  tipoQuestao?: 'multipla' | 'verdadeiro_falso';
 }
 
 export async function saveQuiz(title: string, description: string, questions: QuizQuestion[]) {
@@ -28,6 +29,7 @@ export async function saveQuiz(title: string, description: string, questions: Qu
       options: q.alternativas,
       correct_answer: q.respostaCorreta,
       explanation: q.explicacao,
+      tipo_questao: q.tipoQuestao || 'multipla',
     }));
 
     const { error: questionsError } = await supabase
@@ -77,7 +79,8 @@ export async function getUserQuizzes() {
           question,
           options,
           correct_answer,
-          explanation
+          explanation,
+          tipo_questao
         ),
         user_responses (
           question_id,
@@ -88,7 +91,25 @@ export async function getUserQuizzes() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    
+    // Mapear o campo tipo_questao para tipoQuestao para manter consistência com o frontend
+    const quizzesFormatados = data?.map(quiz => ({
+      ...quiz,
+      questions: quiz.questions.map((question: {
+        id: string;
+        quiz_id: string;
+        question: string;
+        options: string[];
+        correct_answer: number;
+        explanation: string | null;
+        tipo_questao?: string;
+      }) => ({
+        ...question,
+        tipoQuestao: question.tipo_questao || 'multipla'
+      }))
+    }));
+    
+    return quizzesFormatados;
   } catch (error) {
     console.error('Error fetching user quizzes:', error);
     throw error;

@@ -317,42 +317,42 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
             
             return (
               <div key={item.path} className="mb-1">
-                <Link
-                  to={item.path}
-                  className={`
+              <Link
+                to={item.path}
+                className={`
                     flex items-center py-2 px-3 rounded-lg transition-colors
-                    ${isActive
-                      ? darkMode
-                        ? 'bg-[#3D9CD3] text-white'
+                  ${isActive
+                    ? darkMode
+                      ? 'bg-[#3D9CD3] text-white'
                         : 'bg-blue-600 text-white'
-                      : darkMode
+                    : darkMode
                         ? 'text-gray-300 hover:bg-gray-800/50'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }
-                  `}
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }
+                `}
                   onClick={() => {
                     // Se for mobile, fechar a sidebar ao clicar
                     if (isMobile) {
                       setIsExpanded(false);
                     }
                   }}
-                >
+              >
                   <item.icon className={`flex-shrink-0 ${isExpanded ? 'mr-3' : ''}`} />
                   
                   <AnimatePresence initial={false} mode="wait">
-                    {isExpanded && (
-                      <motion.span
+                  {isExpanded && (
+                    <motion.span
                         initial={{ opacity: 0, width: 0 }}
                         animate={{ opacity: 1, width: 'auto' }}
                         exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.2 }}
                         className="truncate"
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </Link>
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Link>
               </div>
             );
           })}
@@ -380,7 +380,7 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
             ${darkMode ? 'hover:bg-gray-800/50' : 'hover:bg-gray-100'}
             transition-all duration-300
           `}
-          onClick={handleProfileClick}
+            onClick={handleProfileClick}
           >
             <div className={`
               ${isExpanded ? 'w-8 h-8' : 'w-7 h-7'}
@@ -408,12 +408,12 @@ export function Sidebar({ darkMode, setDarkMode, isExpanded, setIsExpanded }: Si
             {isExpanded && (
               <div className="flex-1 overflow-hidden">
                 <p className={`text-sm font-medium truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {usuario?.nome}
+                {usuario?.nome}
                 </p>
               </div>
             )}
           </div>
-          
+
           <AnimatePresence>
             {isExpanded && profileModalOpen && <UserMenu />}
           </AnimatePresence>

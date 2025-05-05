@@ -18,18 +18,18 @@ export function AutenticacaoProvider({ children }: { children: React.ReactNode }
   const [carregando, setCarregando] = useState(true);
 
   const carregarUsuario = (session: any) => {
-    if (session) {
-      setUsuario({
-        id: session.user.id,
-        email: session.user.email!,
-        nome: session.user.user_metadata.nome,
+      if (session) {
+        setUsuario({
+          id: session.user.id,
+          email: session.user.email!,
+          nome: session.user.user_metadata.nome,
         fotoUrl: session.user.user_metadata.fotoUrl,
-        criadoEm: new Date(session.user.created_at),
-      });
-    } else {
-      setUsuario(null);
-    }
-    setCarregando(false);
+          criadoEm: new Date(session.user.created_at),
+        });
+      } else {
+        setUsuario(null);
+      }
+      setCarregando(false);
   };
 
   useEffect(() => {

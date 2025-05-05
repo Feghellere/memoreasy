@@ -17,6 +17,7 @@ export interface Question {
   correct_answer: number;
   explanation: string | null;
   created_at: string;
+  tipoQuestao?: 'multipla' | 'verdadeiro_falso';
 }
 
 export interface UserResponse {
